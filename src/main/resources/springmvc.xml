@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!-- 加载数据库配置文件db.properties -->
+    <context:property-placeholder location="classpath:db.properties" system-properties-mode="NEVER"/>
+
+    <!-- 配置数据源信息 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <!-- 配置数据库信息 -->
+        <property name="driverClassName" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${jdbc.usr}"/>
+        <property name="password" value="${password}"/>
+    </bean>
+    <!-- 配置视图解析器 -->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/pages/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+    <!-- 过滤静态资源，如果有的话可以使用 -->
+    <mvc:default-servlet-handler />
+    <!--    <mvc:resources mapping="/images/**" location="/images/" />-->
+    <!--    <mvc:resources mapping="/css/**" location="/css/" />-->
+    <!--    <mvc:resources mapping="/js/**" location="/js/" />-->
+    <!--    <mvc:resources mapping="/lib/**" location="/lib/" />-->
+    <!--    <mvc:resources mapping="/api/**" location="/api/" />-->
+
+    <!-- SpringMVC 基础配置 -->
+    <mvc:annotation-driven />
+
+    <!-- 将控制器所在包 加入 IOC 容器 开启注解扫描 -->
+    <context:component-scan base-package="com.demo.controller" />
+    <context:component-scan base-package="com.demo.service" />
+    <context:component-scan base-package="com.demo.serviceImpl" />
+
+    <!-- 配置mapper相关扫描器 将MyBatis的SQLSessionFactory交给Spring -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 指定批量产生mapper的包 -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <property name="basePackage" value="com.demo.dao"/>
+    </bean>
+
+    <!-- 在SpringIOC容器中 创建MyBatis核心类 SqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 配置数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 加载MyBatis全局配置文件 -->
+        <property name="configLocation" value="classpath:sqlMapConfig.xml" />
+        <!-- 加载 Mapper.xml路径 -->
+        <property name="mapperLocations" value="classpath:mapper/UserDao.xml"/>
+    </bean>
+</beans>
+
